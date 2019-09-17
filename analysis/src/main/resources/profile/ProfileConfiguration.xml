@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<profiles prefix = "R.">
+    <original>
+        <profile category ="basic" key="name" type="String" readonly="false" verify="true" default="" description="用户姓名" deprecated="false" />
+        <profile key="birthday" type="Long" readonly="false" spread="true" default=""  description="用户生日" deprecated="false"/>
+        <profile key="occupation" type="String" readonly="false" default=""  description="用户职业" deprecated="false"/>
+        <profile key="degree" type="String" readonly="false" default=""  description="用户学历" deprecated="false"/>
+    </original>
+
+    <transfer>
+        <profile name="question_state" type="int" readonly="true" ref-profile="question" transMethod="questionToQuestionState" description="计算问题状态"/>
+        <profile name="age" type="int" readonly="true"  ref-profile="birthday" transMethod="birthToAge" description="计算实际年龄"/>
+        <profile name="pictureCount" type="int" readonly="true" ref-profile="photos" transMethod="photosCnt" description="计算照片数量"/>
+        <profile name="flagIsRegisteredOk" type="bool" readonly="true" transMethod="isRegisterOk" description="是否完成注册"/>
+        <profile name="flagWaitVouch" type="bool" readonly="true" ref-state="vouchStatus" transMethod="isWaitVouch" description="是否处于Vouch In Progress状态"/>
+        <profile name="flagIsDeleteAccount" type="bool" readonly="true" transMethod="isAccountDeleted" description="账号是否被删除"/>
+        <profile name="flagVouchResult" type="bool" readonly="true" ref-state="vouchStatus" transMethod="isVouchOut" description="是否被Vouch Out"/>
+        <profile name="firstStamp" type="int" readonly="true" transMethod="getAccountCreateTime" description="获取账户的创建时间"/>
+        <profile name="accountState" type="int" readonly="true" transMethod="getAccountStatus" description="获取账户的状态"/>
+        <profile name="flagIsRegisterByMail" type="bool" readonly="true" transMethod="isRegisterByMail" description="是否通过邮箱注册"/>
+        <profile name="flagIsFixBugIos" type="bool" readonly="true" transMethod="isVouchInProgressNeedMore" description="Vouch审核阶段是否需要提供更多的信息"/>
+        <profile name="flagNeedVerifyAvatar" type="bool" readonly="true" transMethod="isForcedVerifyAvatar" description="是否处于强制认证头像状态"/>
+    </transfer>
+</profiles>
