@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<profiles prefix = "R.">
-    <original>
+<profiles>
+    <original  prefix = "R.">
         <profile category ="basic" key="name" type="String" readonly="false" verify="true" default="" description="用户姓名" deprecated="false" />
         <profile key="birthday" type="Long" readonly="false" spread="true" default=""  description="用户生日" deprecated="false"/>
         <profile key="occupation" type="String" readonly="false" default=""  description="用户职业" deprecated="false"/>
@@ -8,7 +8,6 @@
     </original>
 
     <transfer>
-        <profile name="question_state" type="int" readonly="true" ref-profile="question" transMethod="questionToQuestionState" description="计算问题状态"/>
         <profile name="age" type="int" readonly="true"  ref-profile="birthday" transMethod="birthToAge" description="计算实际年龄"/>
         <profile name="pictureCount" type="int" readonly="true" ref-profile="photos" transMethod="photosCnt" description="计算照片数量"/>
         <profile name="flagIsRegisteredOk" type="bool" readonly="true" transMethod="isRegisterOk" description="是否完成注册"/>
@@ -21,4 +20,5 @@
         <profile name="flagIsFixBugIos" type="bool" readonly="true" transMethod="isVouchInProgressNeedMore" description="Vouch审核阶段是否需要提供更多的信息"/>
         <profile name="flagNeedVerifyAvatar" type="bool" readonly="true" transMethod="isForcedVerifyAvatar" description="是否处于强制认证头像状态"/>
     </transfer>
+
 </profiles>

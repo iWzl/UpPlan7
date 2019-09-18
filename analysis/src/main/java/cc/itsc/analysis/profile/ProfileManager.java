@@ -42,7 +42,7 @@ public class ProfileManager {
     /**
      * Profile Key 及其对应的属性
      */
-    private static Map<String,ProfileDefinition> key2Profile = new HashMap<>();
+    private static Map<String, ProfileDefinition> key2Profile = new HashMap<>();
     /**
      * Profile 分组profile对应的Key
      */
@@ -69,7 +69,6 @@ public class ProfileManager {
     private static Set<String> deprecatedKeys = new HashSet<>();
 
 
-
     public void loadProfileDefinition() {
         SAXReader reader = new SAXReader();
         try {
@@ -82,70 +81,7 @@ public class ProfileManager {
                 if (PROFILE_ELEMENT_ORIGINAL.equals(itemName) || PROFILE_ELEMENT_TRANSFER.equals(itemName)) {
                     Iterator profileIter = item.elementIterator();
                     while (profileIter.hasNext()) {
-                        Element profile = (Element) profileIter.next();
-                        Attribute attributeName = profile.attribute(PROFILE_ATTRIBUTE_KEY);
-                        Attribute attributeType = profile.attribute(PROFILE_ATTRIBUTE_TYPE);
-                        Attribute attributeVerify = profile.attribute(PROFILE_ATTRIBUTE_VERIFY);
-                        Attribute attributeSpread = profile.attribute(PROFILE_ATTRIBUTE_SPREAD);
-                        Attribute attributeReadonly = profile.attribute(PROFILE_ATTRIBUTE_READONLY);
-                        Attribute attributeDefault = profile.attribute(PROFILE_ATTRIBUTE_DEFAULT);
-                        Attribute attributeDeprecated = profile.attribute(PROFILE_ATTRIBUTE_DEPRECATED);
-                        Attribute attributeDescription = profile.attribute(PROFILE_ATTRIBUTE_DESCRIPTION);
-
-                        String profileName = attributeName.getValue();
-                        String profileType = attributeType.getValue();
-                        String description = "";
-                        if (null != attributeDescription) {
-                            description = attributeDescription.getValue();
-                        }
-                        if (!PROFILE_ELEMENT_TRANSFER.equals(itemName)) {
-                            name2Column.put(profileName, String.format("%s%s",keyPrefix, profileName));
-                        }
-                        boolean needVerify = attribute2Boolean(attributeVerify);
-                        boolean needSpread = attribute2Boolean(attributeSpread);
-                        boolean readOnly = attribute2Boolean(attributeReadonly);
-                        boolean deprecated = attribute2Boolean(attributeDeprecated);
-                        if (needVerify) { needVerifyKeys.add(profileName);}
-                        if (needSpread) { needSpreadKeys.add(profileName);}
-                        if (readOnly) { readOnlyKeys.add(profileName);}
-                        if (deprecated) { deprecatedKeys.add(profileName);}
-                        String defaultVal = null;
-                        if (null != attributeDefault){
-                            defaultVal = attributeDefault.getValue();
-                        }
-                        if (key2Profile.containsKey(profileName)) {
-                            throw new RuntimeException(String.format("duplicated profile [%s]", profileName));
-                        }
-                        if (!PROFILE_ELEMENT_TRANSFER.equals(itemName)) {
-                            key2Profile.put(profileName, new ProfileOriginal(
-                                    profileName, profileType,readOnly,defaultVal,description,deprecated,needVerify,needSpread)
-                            );
-                        } else {
-                            Attribute attributeTransMethod = profile.attribute(PROFILE_ELEMENT_TRANSFER);
-                            Attribute attributeRefProfile = profile.attribute(PROFILE_ATTRIBUTE_REF_PROFILE);
-                            Attribute attributeRefState = profile.attribute(PROFILE_ATTRIBUTE_REF_STATE);
-                            String transMethod = "";
-                            if (null != attributeTransMethod) {
-                                transMethod = attributeTransMethod.getValue();
-                            }
-                            List<String> refProfiles = new LinkedList<>();
-                            if (null != attributeRefProfile) {
-                                refProfiles.add(attributeRefProfile.getValue());
-                            }
-                            List<String> refStates = new ArrayList<>();
-                            if (null != attributeRefState) {
-                                refStates.add(attributeRefState.getValue());
-                            }
-                            Iterator refProfileIter = profile.elementIterator();
-                            while (refProfileIter.hasNext()) {
-                                Element refProfile = (Element) refProfileIter.next();
-                                String refProfileName = refProfile.attribute("name").getValue();
-                                refProfiles.add(refProfileName);
-                            }
-                            key2Profile.put(profileName, new ProfileTransfer(
-                                    profileName, profileType,readOnly,defaultVal,description,deprecated,refProfiles,refStates,transMethod)
-                            );
-                        }
+                        loadCommonProfileDefinition((Element) profileIter.next(), itemName);
                     }
                 }
             }
@@ -154,11 +90,88 @@ public class ProfileManager {
         }
     }
 
+    private void loadCommonProfileDefinition(Element profile, String itemName) {
+        Attribute attributeName = profile.attribute(PROFILE_ATTRIBUTE_KEY);
+        Attribute attributeType = profile.attribute(PROFILE_ATTRIBUTE_TYPE);
+        Attribute attributeCategory = profile.attribute(PROFILE_ATTRIBUTE_CATEGORY);
+        Attribute attributeVerify = profile.attribute(PROFILE_ATTRIBUTE_VERIFY);
+        Attribute attributeSpread = profile.attribute(PROFILE_ATTRIBUTE_SPREAD);
+        Attribute attributeReadonly = profile.attribute(PROFILE_ATTRIBUTE_READONLY);
+        Attribute attributeDefault = profile.attribute(PROFILE_ATTRIBUTE_DEFAULT);
+        Attribute attributeDescription = profile.attribute(PROFILE_ATTRIBUTE_DESCRIPTION);
+        Attribute attributeDeprecated = profile.attribute(PROFILE_ATTRIBUTE_DEPRECATED);
+
+        String profileName = attributeName.getValue();
+        String profileType = attributeType.getValue();
+        String description = "";
+        if (null != attributeDescription) {
+            description = attributeDescription.getValue();
+        }
+        if (!PROFILE_ELEMENT_TRANSFER.equals(itemName)) {
+            name2Column.put(profileName, String.format("%s%s", keyPrefix, profileName));
+        }
+        boolean needVerify = attribute2Boolean(attributeVerify);
+        boolean needSpread = attribute2Boolean(attributeSpread);
+        boolean readOnly = attribute2Boolean(attributeReadonly);
+        boolean deprecated = attribute2Boolean(attributeDeprecated);
+        if (needVerify) {
+            needVerifyKeys.add(profileName);
+        }
+        if (needSpread) {
+            needSpreadKeys.add(profileName);
+        }
+        if (readOnly) {
+            readOnlyKeys.add(profileName);
+        }
+        if (deprecated) {
+            deprecatedKeys.add(profileName);
+        }
+        String defaultVal = null;
+        if (null != attributeDefault) {
+            defaultVal = attributeDefault.getValue();
+        }
+        if (key2Profile.containsKey(profileName)) {
+            throw new RuntimeException(String.format("duplicated profile [%s]", profileName));
+        }
+        if (!PROFILE_ELEMENT_TRANSFER.equals(itemName)) {
+            key2Profile.put(profileName, new ProfileOriginal(
+                    profileName, profileType, readOnly, defaultVal, description, deprecated, needVerify, needSpread)
+            );
+        } else {
+            Attribute attributeTransMethod = profile.attribute(PROFILE_ATTRIBUTE_TRANS_METHOD);
+            Attribute attributeRefProfile = profile.attribute(PROFILE_ATTRIBUTE_REF_PROFILE);
+            Attribute attributeRefState = profile.attribute(PROFILE_ATTRIBUTE_REF_STATE);
+            String transMethod = "";
+            if (null != attributeTransMethod) {
+                transMethod = attributeTransMethod.getValue();
+            }
+            List<String> refProfiles = new LinkedList<>();
+            if (null != attributeRefProfile) {
+                refProfiles.add(attributeRefProfile.getValue());
+            }
+            List<String> refStates = new ArrayList<>();
+            if (null != attributeRefState) {
+                refStates.add(attributeRefState.getValue());
+            }
+            Iterator refProfileIter = profile.elementIterator();
+            while (refProfileIter.hasNext()) {
+                Element refProfile = (Element) refProfileIter.next();
+                String refProfileName = refProfile.attribute("name").getValue();
+                refProfiles.add(refProfileName);
+            }
+            key2Profile.put(profileName, new ProfileTransfer(
+                    profileName, profileType, readOnly, defaultVal, description, deprecated, refProfiles, refStates, transMethod)
+            );
+        }
+    }
 
 
-    private boolean attribute2Boolean(Attribute attribute){
+    private void loadDefaultTransferDefinition(){}
+
+
+    private boolean attribute2Boolean(Attribute attribute) {
         boolean value = false;
-        if(null != attribute){
+        if (null != attribute) {
             value = Boolean.parseBoolean(attribute.getValue());
         }
         return value;
