@@ -42,7 +42,7 @@ public class SensitiveWordUtil {
         //迭代sensitiveWordSet
         for (String s : sensitiveWordSet) {
             //关键字
-            key = s;
+            key = s.toLowerCase();
             nowMap = sensitiveWordMap;
             for (int i = 0; i < key.length(); i++) {
                 //转换成char型
